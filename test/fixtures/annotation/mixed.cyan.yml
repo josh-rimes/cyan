@@ -1,0 +1,20 @@
+build-job:
+  stage: build
+  script:
+    - echo "starting build"
+    - '@aws-login(region: "eu-west-1", profile: "default")'
+    - npm run build
+    - "@docker-build-push()"
+    - echo "done, @docker-build-push mid-string should NOT be detected"
+
+deploy-job:
+  stage: deploy
+  script:
+    - '@kubectl-apply(cluster: "prod", namespace: "default")'
+    - '@aws-login(region: "eu-west-1",)'
+    - "@aws-login(region: eu-west-1)"
+    - echo "plain line, not an annotation"
+
+not-a-script-block:
+  variables:
+    - '@aws-login(region: "should-be-ignored")'
