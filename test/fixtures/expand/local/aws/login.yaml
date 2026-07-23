@@ -1,0 +1,15 @@
+name: login
+namespace: aws
+version: "2.0.0-local"
+description: Local override for AWS login
+parameters:
+  region:
+    type: string
+    required: true
+  profile:
+    type: string
+    required: false
+    default: default
+script:
+  - "aws configure set region {{region}} # local override"
+  - "aws sts get-caller-identity --profile {{profile}}"

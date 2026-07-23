@@ -1,0 +1,11 @@
+name: build-push
+namespace: docker
+version: "1.0.0"
+description: Build and push a Docker image
+parameters:
+  image:
+    type: string
+    required: true
+script:
+  - "docker build -t {{image}} ."
+  - "docker push {{image}}"

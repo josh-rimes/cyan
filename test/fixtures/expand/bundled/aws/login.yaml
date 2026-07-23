@@ -1,0 +1,16 @@
+name: login
+namespace: aws
+version: "1.0.0"
+description: Log in to AWS via the CLI
+parameters:
+  region:
+    type: string
+    required: true
+  profile:
+    type: string
+    required: false
+    default: default
+script:
+  - "aws configure set region {{region}}"
+  - "aws sts get-caller-identity --profile {{profile}}"
+  - "echo commit is $CI_COMMIT_SHA"

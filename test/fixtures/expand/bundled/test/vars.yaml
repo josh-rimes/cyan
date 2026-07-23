@@ -1,0 +1,10 @@
+name: vars
+namespace: test
+version: "1.0.0"
+description: Fixture snippet for verifying $VAR passthrough during interpolation
+parameters:
+  message:
+    type: string
+    required: true
+script:
+  - "echo {{message}} at commit $CI_COMMIT_SHA"
