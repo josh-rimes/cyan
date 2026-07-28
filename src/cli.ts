@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import { runExplainCommand } from "./commands/expand.js";
+import { join } from "path";
 
 const program = new Command();
 
@@ -42,10 +44,22 @@ program
   .argument("<source>", "path to the .cyan.yml source file")
   .option("--explain", "print resolution details for each annotation")
   .action((source: string, options: { explain?: boolean }) => {
-    console.log("expand: not implemented yet", {
-      source,
-      explain: options.explain,
-    });
+    if (!options.explain) {
+      console.error(
+        "expand: only --explain is currently implemented. Run `cyan expand --explain <source>`.",
+      );
+      process.exitCode = 1;
+      return;
+    }
+
+    const dirs = {
+      localDir: "./cyan-snippets",
+      bundledDir: join(__dirname, "../snippets/bundled"),
+    };
+
+    const { text, exitCode } = runExplainCommand(source, dirs);
+    console.log(text);
+    process.exitCode = exitCode;
   });
 
 program

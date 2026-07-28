@@ -1,0 +1,3 @@
+build:
+  script:
+    - '@aws-login(region: "us-east-1")'

@@ -1,0 +1,10 @@
+build:
+  script:
+    - '@aws-login(region: "eu-west-1")'
+    - "echo building"
+
+deploy:
+  script:
+    - "@aws-login(region: eu-west-1)"
+    - '@docker-build-push(image: "myapp")'
+    - '@aws-login(region: "eu-west-1", extra:"nope")'

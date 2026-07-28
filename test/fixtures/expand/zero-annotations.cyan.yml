@@ -1,0 +1,5 @@
+build:
+  script:
+    - "echo hello"
+    - "npm install"
+    - "npm test"
