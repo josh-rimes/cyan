@@ -1,8 +1,9 @@
-import { readFileSync } from "node:fs";
-import { parseYamlSource, detectAnnotations } from "../annotation/detect.js";
-import { parseAnnotation } from "../annotation/parse.js";
 import {
-  AnnotationCall,
+  loadSourceAnnotations,
+  type SourceReadError,
+  type SourceParseError,
+} from "./shared/load-source.js";
+import {
   AnnotationParseError,
   AnnotationLocation,
 } from "../annotation/types.js";
@@ -14,81 +15,15 @@ import {
   type ExpandError,
 } from "../expand/expand.js";
 import { ResolveDirs } from "../expand/resolve.js";
-import { exitCode } from "node:process";
-
-export interface SourceReadError {
-  kind: "source-not-found";
-  path: string;
-  message: string;
-}
-
-export interface SourceParseError {
-  kind: "invalid-yaml";
-  path: string;
-  message: string;
-}
 
 export interface ExplainOutput {
   text: string;
   exitCode: 0 | 1;
 }
 
-export type SourceLoadResult =
-  | {
-      ok: true;
-      calls: AnnotationCall[];
-      candidateErrors: AnnotationParseError[];
-    }
-  | { ok: false; error: SourceReadError | SourceParseError };
-
 export type ExplainItem =
   | { kind: "call-parse-error"; error: AnnotationParseError }
   | { kind: "expand-result"; result: ExpandResult };
-
-export function loadSourceAnnotations(path: string): SourceLoadResult {
-  let text: string;
-  try {
-    text = readFileSync(path, "utf-8");
-  } catch {
-    return {
-      ok: false,
-      error: {
-        kind: "source-not-found",
-        path,
-        message: `Source file was not found: ${path}`,
-      },
-    };
-  }
-
-  const { doc, lineCounter } = parseYamlSource(text);
-
-  if (doc.errors.length > 0) {
-    return {
-      ok: false,
-      error: {
-        kind: "invalid-yaml",
-        path,
-        message: `Invalid YAML in ${path}: ${doc.errors.map((e) => e.message).join("; ")}`,
-      },
-    };
-  }
-
-  const candidates = detectAnnotations(doc, lineCounter);
-
-  const calls: AnnotationCall[] = [];
-  const candidateErrors: AnnotationParseError[] = [];
-
-  for (const candidate of candidates) {
-    const result = parseAnnotation(candidate);
-    if (result.ok) {
-      calls.push(result.value);
-    } else {
-      candidateErrors.push(result.error);
-    }
-  }
-
-  return { ok: true, calls, candidateErrors };
-}
 
 export function runExpandExplain(
   path: string,
@@ -132,7 +67,7 @@ export function runExpandExplain(
   return { ok: true, items };
 }
 
-function formatLocation(location: AnnotationLocation): string {
+export function formatLocation(location: AnnotationLocation): string {
   const pathStr = location.path
     .map((seg) => (typeof seg === "number" ? `[${seg}]` : seg))
     .join(".")
@@ -150,7 +85,7 @@ export function formatSuccess(result: ExpansionSuccess): string {
   return [header, identity, linesHeader, lines].join("\n");
 }
 
-function formatExpandError(error: ExpandError): string {
+export function formatExpandError(error: ExpandError): string {
   if (error.kind === "snippet-validation-error") {
     const fieldErrors = error.errors
       .map((ve) => `filed "${ve.field}": ${ve.message}`)
@@ -173,7 +108,7 @@ export function formatFailure(failure: ExpansionFailure): string {
 
 export function formatCallParseError(error: AnnotationParseError): string {
   const header = formatLocation(error.location);
-  const indentity = ` failed to parse annotation call (${error.kind})`;
+  const indentity = `FAIL: failed to parse annotation call (${error.kind})`;
   const detail = `    - ${error.message}`;
   const rawLine = `   raw: ${error.raw}`;
 

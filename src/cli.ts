@@ -2,7 +2,11 @@
 
 import { Command } from "commander";
 import { runExplainCommand } from "./commands/expand.js";
-import { join } from "path";
+import { runLintCommand } from "./commands/lint.js";
+import { join, dirname } from "path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const program = new Command();
 
@@ -69,7 +73,14 @@ program
   )
   .argument("<source>", "path to the .cyan.yml source file")
   .action((source: string) => {
-    console.log("lint: not implemented yet");
+    const dirs = {
+      localDir: "./cyan-snippets",
+      bundledDir: join(__dirname, "../snippets/bundled"),
+    };
+
+    const { text, exitCode } = runLintCommand(source, dirs);
+    console.log(text);
+    process.exitCode = exitCode;
   });
 
 program.parse();
