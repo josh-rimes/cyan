@@ -1,0 +1,22 @@
+name: login
+namespace: aws
+version: "1.0.0"
+description: >
+  Configures the AWS CLI using static credentials from GitLab CI/CD
+  variables ($AWS_ACCESS_KEY_ID, $AWS_SECRET_ACCESS_KEY) and verifies
+  the login with sts get-caller-identity. Does not use OIDC role
+  assumption, since that requires job-level id_tokens configuration
+  outside the scope of a script-level annotation.
+parameters:
+  profile:
+    type: string
+    required: false
+    default: default
+  region:
+    type: string
+    required: true
+script:
+  - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID --profile {{profile}}
+  - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY --profile {{profile}}
+  - aws configure set region {{region}} --profile {{profile}}
+  - aws sts get-caller-identity --profile {{profile}}

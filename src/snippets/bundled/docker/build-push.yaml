@@ -1,0 +1,21 @@
+name: build-push
+namespace: docker
+version: "1.0.0"
+description: >
+  Builds a Docker image tagged with the GitLab commit SHA and pushes it 
+  to the project's container registry. Uses $CI_REGISTRY_IMAGE and 
+  $CI_COMMIT_SHA, GitLab's own predefined variables, for registry/image
+  identity. Does not perform docker login; assumes the pipeline has 
+  already authenticated to the registry separately.
+parameters:
+  dockerfile:
+    type: string
+    required: false
+    default: Dockerfile
+  context:
+    type: string
+    required: false
+    default: "."
+script:
+  - docker build -f {{dockerfile}} -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA {{context}}
+  - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA

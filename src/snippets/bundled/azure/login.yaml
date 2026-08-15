@@ -1,0 +1,16 @@
+name: login
+namespace: azure
+version: "1.0.0"
+description: >
+  Logs in to Azure CLI using a service principal with credentials from 
+  GitLab CI/CD variables ($AZURE_CLIENT_ID, $AZURE_CLIENT_SECRET,
+  $AZURE_TENANT_ID), sets the active subscription, and verifies the 
+  login with account show.
+parameters:
+  subscription:
+    type: string
+    required: true
+script:
+  - az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+  - az account set --subscription {{subscription}}
+  - az account show

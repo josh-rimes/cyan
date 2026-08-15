@@ -1,0 +1,22 @@
+name: apply
+namespace: kubectl
+version: "1.0.0"
+description: >
+  Selects a kubectl context and applies a manifest to a namespace.
+  Assumes a working kubeconfig already exists in the environment
+  (typically injected via a GitLab CI/CD file-type variable or a
+  separate auth step); does not set up kubeconfig itself.
+parameters:
+  context:
+    type: string
+    required: true
+  manifest:
+    type: string
+    required: true
+  namespace:
+    type: string
+    required: false
+    default: default
+script:
+  - kubectl config use-context {{context}}
+  - kubectl apply -f {{manifest}} -n {{namespace}}
