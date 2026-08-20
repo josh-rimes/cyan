@@ -1,0 +1,4 @@
+build:
+  script:
+    - '@aws-login(region: "eu-west-1")'
+    - '@docker-build-push(image: "x")'

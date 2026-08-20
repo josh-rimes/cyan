@@ -3,6 +3,7 @@
 import { Command } from "commander";
 import { runExplainCommand } from "./commands/expand.js";
 import { runLintCommand } from "./commands/lint.js";
+import { runBuildCommand } from "./commands/build.js";
 import { join, dirname } from "path";
 import { fileURLToPath } from "node:url";
 
@@ -34,10 +35,14 @@ program
   .argument("<source>", "path to the .cyan.yml source file")
   .option("-o, --output <path>", "output file path")
   .action((source: string, options: { output?: string }) => {
-    console.log("build: not implemented yet", {
-      source,
-      output: options.output,
-    });
+    const dirs = {
+      localDir: "./cyan-snippets",
+      bundledDir: join(__dirname, "./snippets/bundled"),
+    };
+
+    const { text, exitCode } = runBuildCommand(source, options.output, dirs);
+    console.log(text);
+    process.exitCode = exitCode;
   });
 
 program
@@ -58,7 +63,7 @@ program
 
     const dirs = {
       localDir: "./cyan-snippets",
-      bundledDir: join(__dirname, "../snippets/bundled"),
+      bundledDir: join(__dirname, "./snippets/bundled"),
     };
 
     const { text, exitCode } = runExplainCommand(source, dirs);
@@ -75,7 +80,7 @@ program
   .action((source: string) => {
     const dirs = {
       localDir: "./cyan-snippets",
-      bundledDir: join(__dirname, "../snippets/bundled"),
+      bundledDir: join(__dirname, "./snippets/bundled"),
     };
 
     const { text, exitCode } = runLintCommand(source, dirs);

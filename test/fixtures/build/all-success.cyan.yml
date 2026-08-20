@@ -1,0 +1,6 @@
+# a comment that must survive
+build:
+  script:
+    - echo before
+    - '@aws-login(region: "eu-west-1")'
+    - echo after

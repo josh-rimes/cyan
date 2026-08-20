@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import type { Document } from "yaml";
 import { parseYamlSource, detectAnnotations } from "../../annotation/detect.js";
 import { parseAnnotation } from "../../annotation/parse.js";
 import {
@@ -21,6 +22,7 @@ export interface SourceParseError {
 export type SourceLoadResult =
   | {
       ok: true;
+      doc: Document.Parsed;
       calls: AnnotationCall[];
       candidateErrors: AnnotationParseError[];
     }
@@ -68,5 +70,5 @@ export function loadSourceAnnotations(path: string): SourceLoadResult {
     }
   }
 
-  return { ok: true, calls, candidateErrors };
+  return { ok: true, doc, calls, candidateErrors };
 }

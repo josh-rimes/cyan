@@ -21,8 +21,7 @@ deploy-job:
 const { doc, lineCounter } = parseYamlSource(source);
 const candidates = detectAnnotations(doc, lineCounter);
 
-// Hand-written malformed candidate to exercise the trailing-comma path.
-// We fake a location since we're not pulling this one from real YAML.
+// Hand-written malformed candidate to exercise the trailing-comma path. We fake a location since we're not pulling this one from real YAML.
 const malformed: AnnotationCandidate = {
   raw: '@aws-login(region: "eu-west-1",)',
   location: { line: 999, col: 1, path: ["fake"] },

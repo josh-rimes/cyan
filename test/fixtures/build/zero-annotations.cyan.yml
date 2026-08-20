@@ -1,0 +1,4 @@
+build:
+  script:
+    - echo just a plain script
+    - echo another line

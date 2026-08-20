@@ -49,8 +49,7 @@ export function runExpandExplain(
     ),
   ];
 
-  // Sort by location.line so output reads top-to-bottom regardless of
-  // which population an item came from.
+  // Sort by location.line so output reads top-to-bottom regardless of which population an item came from.
   items.sort((a, b) => {
     const lineA =
       a.kind === "call-parse-error"
