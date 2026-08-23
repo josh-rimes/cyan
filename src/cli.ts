@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import { runInitCommand } from "./commands/init.js";
 import { runExplainCommand } from "./commands/expand.js";
 import { runLintCommand } from "./commands/lint.js";
 import { runBuildCommand } from "./commands/build.js";
@@ -23,8 +24,15 @@ program
   .description(
     "Scaffold a starter .gitlab-ci.cyan.yml and cyan-snippets/ folder",
   )
-  .action(() => {
-    console.log("init: not implemented yet");
+  .option("--force", "Overwrite an existing .gitlab-ci.cyan.yml", false)
+  .action((options: { force: boolean }) => {
+    const result = runInitCommand({ cwd: process.cwd(), force: options.force });
+    if (!result.ok) {
+      console.error(`Error: ${result.error}`);
+      process.exitCode = 1;
+      return;
+    }
+    console.log("Created .gitlab-ci.cyan.yml and cyan-snippets/");
   });
 
 program
