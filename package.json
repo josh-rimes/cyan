@@ -1,9 +1,9 @@
 {
-  "name": "cyan",
-  "version": "0.1.0",
+  "name": "cyan-cli",
+  "version": "1.0.0",
   "description": "CLI preprocessor for GitLab CI YAML — expands @annotations into pre-built pipeline snippets",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/cli.js",
   "bin": {
     "cyan": "./dist/cli.js"
   },
@@ -11,13 +11,13 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-bundled-snippets.mjs",
     "dev": "tsx src/cli.ts",
     "test": "vitest run"
   },
   "keywords": [],
-  "author": "josh rimes",
-  "license": "ISC",
+  "author": "josh-rimes",
+  "license": "MIT",
   "dependencies": {
     "commander": "^15.0.0",
     "yaml": "^2.9.0"
@@ -27,5 +27,9 @@
     "tsx": "^4.22.5",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
-  }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
 }

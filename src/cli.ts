@@ -17,7 +17,7 @@ program
   .description(
     "CLI preprocessor for GitLab CI YAML — expands @annotations into pre-built pipeline snippets",
   )
-  .version("0.1.0");
+  .version("1.0.0");
 
 program
   .command("init")
