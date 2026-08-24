@@ -35,7 +35,7 @@ jobs:
           echo "Version check passed: $TAG_NAME"
 
       - name: Build
-        run: npm run Build
+        run: npm run build
 
       - name: Publish to npm
         run: npm publish
