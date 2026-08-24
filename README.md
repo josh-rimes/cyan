@@ -1,6 +1,6 @@
-# Cyan v0.1.4
+# Cyan v1.0.0
 
-Cyan is a CLI preprocessor for GitLab CI YAML. It lets you write `@annotations` inside `script:` blocks of .gitlab-ci.cyan.yml files, which Cyan expands into pre-built or custom, parameterized snippets — producing an ordinary .gitlab-ci.yml that GitLab CI understands natively. Cyan v0.1.4 has no runtime component: it only runs at build time, before your pipeline executes.
+Cyan is a CLI preprocessor for GitLab CI YAML. It lets you write `@annotations` inside `script:` blocks of .gitlab-ci.cyan.yml files, which Cyan expands into pre-built or custom, parameterized snippets — producing an ordinary .gitlab-ci.yml that GitLab CI understands natively. Cyan v1.0.0 has no runtime component: it only runs at build time, before your pipeline executes.
 
 Cyan is GitLab CI–only and CLI-only. It does not support GitHub Actions, Azure Pipelines, or other CI platforms, and there's no editor plugin or live/runtime expansion yet — annotations are only ever expanded by explicitly running `cyan build` or `cyan expand`. Snippets support simple `{{param}}` string parameters with defaults; there's no conditional or loop logic inside snippets, by design — this keeps expanded output fully predictable and easy to audit.
 <br><br>
@@ -14,12 +14,25 @@ Cyan is GitLab CI–only and CLI-only. It does not support GitHub Actions, Azure
 - [Bundled Snippets](#bundled-snippets)
 - [Local Snippet Overrides](#local-snippet-overrides)
 - [Why Trust This?](#why-trust-this)
+- [License](#license)
 
 <br>
 
 ## Installation
 
-Cyan isn't published to npm yet. To use it locally:
+Install globally from npm:
+
+```bash
+npm install -g cyan-cli
+```
+
+Verify with:
+
+```bash
+cyan --help
+```
+
+To work on Cyan:
 
 ```bash
 git clone <repo-url>
@@ -29,7 +42,7 @@ npm run build
 npm link
 ```
 
-This builds the CLI to dist/cli.ts and links the cyan command globally. Verfiy with:
+This builds the CLI to `dist/cli.js` and links the `cyan` command globally. Verify with:
 
 ```bash
 cyan --help
@@ -82,7 +95,7 @@ Edit it as needed, then validate your annotations before building:
 cyan lint .gitlab-ci.cyan.yml
 ```
 
-Preview exaclty what each annotation will expand to, without writing any file:
+Preview exactly what each annotation will expand to, without writing any file:
 
 ```bash
 cyan expand --explain .gitlab-ci.cyan.yml
@@ -398,3 +411,9 @@ Cyan touches credential and deployment logic — AWS keys, Azure service princip
 - **Result types, not exceptions.** Internally, Cyan represents success and failure as explicit discriminated unions (`{ ok: true }` / `{ ok: false }`) rather than throwing. This isn't visible to you as a user, but it means failure paths are handled deliberately throughout the codebase rather than falling through to an uncaught exception.
 
 None of this makes Cyan clever. That's deliberate — for a tool sitting in front of deploy and login steps, boring and inspectable beats convenient and opaque.
+
+<br>
+
+## License
+
+MIT
