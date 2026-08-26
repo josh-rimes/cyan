@@ -1,8 +1,8 @@
 # Cyan v1.0.0
 
-Cyan is a CLI preprocessor for GitLab CI YAML. It lets you write `@annotations` inside `script:` blocks of .gitlab-ci.cyan.yml files, which Cyan expands into pre-built or custom, parameterized snippets — producing an ordinary .gitlab-ci.yml that GitLab CI understands natively. Cyan v1.0.0 has no runtime component: it only runs at build time, before your pipeline executes.
+Cyan is a CLI preprocessor for GitLab CI YAML. It lets you write `@annotations` inside `script:` blocks of .gitlab-ci.cyan.yml files, which Cyan expands into pre-built or custom, parameterized snippets. This produces an ordinary .gitlab-ci.yml that GitLab CI understands natively. Cyan v1.0.0 has no runtime component - it only runs at build time, before your pipeline executes.
 
-Cyan is GitLab CI–only and CLI-only. It does not support GitHub Actions, Azure Pipelines, or other CI platforms, and there's no editor plugin or live/runtime expansion yet — annotations are only ever expanded by explicitly running `cyan build` or `cyan expand`. Snippets support simple `{{param}}` string parameters with defaults; there's no conditional or loop logic inside snippets, by design — this keeps expanded output fully predictable and easy to audit.
+Cyan is GitLab CI–only and CLI-only. It does not support GitHub Actions, Azure Pipelines, or other CI platforms, and there's no editor plugin or live/runtime expansion yet; annotations are only ever expanded by explicitly running `cyan build` or `cyan expand`. Snippets support simple `{{param}}` string parameters with defaults; there's no conditional or loop logic inside snippets, by design. This keeps expanded output fully predictable and easy to audit.
 <br><br>
 
 ## Table of Contents
@@ -130,12 +130,12 @@ Error: cyan-snippets already exists and is not empty.
 
 ## Annotation Syntax
 
-An annotation must be the **entire trimmed scalar value** of a sequence item inside a `script:` block. Cyan detects annotations by matching the whole (trimmed) string of each script list item — annotations embedded mid-string or used as mapping values are not recognized and are left untouched.
+An annotation must be the **entire trimmed scalar value** of a sequence item inside a `script:` block. Cyan detects annotations by matching the whole (trimmed) string of each script list item. Annotations embedded mid-string or used as mapping values are not recognized and are left untouched.
 
 ```yaml
 script:
   - '@docker-build-push(dockerfile: "Dockerfile", context: ".")' # recognized
-  - echo "@docker-build-push(...)" # NOT recognized — left as-is
+  - echo "@docker-build-push(...)" # NOT recognized - left as-is
 ```
 
 **Call syntax:**
@@ -144,15 +144,15 @@ script:
 @namespace-name(param: "value", param2: "value2")
 ```
 
-- The namespace/name split happens on the first hyphen only. `docker-build-push` splits into namespace `docker`, name `build-push` — so a snippet named `build-push` under namespace `docker` is called as `@docker-build-push(...)`, not `@docker-build-push-push(...)` or similar ambiguity.
+- The namespace/name split happens on the first hyphen only. `docker-build-push` splits into namespace `docker`, name `build-push` - so a snippet named `build-push` under namespace `docker` is called as `@docker-build-push(...)`, not `@docker-build-push-push(...)` or similar ambiguity.
 - Parameters are `key: "value"` pairs, comma-separated, always double-quoted strings. There are no number or boolean parameter types in v1.
-- Unknown parameters are rejected — passing a param the snippet doesn't define is a hard error, not a silent ignore.
+- Unknown parameters are rejected - passing a param the snippet doesn't define is a hard error, not a silent ignore.
 - Optional parameters have a default; if omitted, the default is used. If a parameter has no default and no value is supplied, that's a hard build error (since Cyan has no conditionals, an unfilled `{{param}}` would otherwise produce broken output).
 
-`{{param}}` **vs** `$VAR` **— never blur these:**
+`{{param}}` **vs** `$VAR` **- never blur these:**
 
-- `{{param}}` is a **Cyan parameter** — resolved and substituted at build time, before GitLab ever sees the file.
-- `$VAR` (e.g. `$CI_COMMIT_SHA`, `$CI_REGISTRY`) is a **native GitLab CI variable** — left completely untouched by Cyan, resolved by GitLab itself when the pipeline runs.
+- `{{param}}` is a **Cyan parameter** - resolved and substituted at build time, before GitLab ever sees the file.
+- `$VAR` (e.g. `$CI_COMMIT_SHA`, `$CI_REGISTRY`) is a **native GitLab CI variable** - left completely untouched by Cyan, resolved by GitLab itself when the pipeline runs.
 
 Example from the `docker-build-push` snippet, showing both in the same expanded block:
 
@@ -170,9 +170,9 @@ Here `{{dockerfile}}` and `{{context}}` come from the annotation call's params; 
 
 ### **`cyan init [--force]`**
 
-Scaffolds a starter `.gitlab-ci.cyan.yml` and an empty `cyan-snippets/` folder in the current directory. Works fully offline. Checks both the starter file and the cyan-snippets/ folder for collisions before writing anything — if either check fails, nothing is written.
+Scaffolds a starter `.gitlab-ci.cyan.yml` and an empty `cyan-snippets/` folder in the current directory. Works fully offline. Checks both the starter file and the cyan-snippets/ folder for collisions before writing anything. If either check fails, nothing is written.
 
-- `--force` — overwrite an existing `.gitlab-ci.cyan.yml`. Does not apply to `cyan-snippets/`: a pre-existing non-directory or non-empty `cyan-snippets` is always a hard error, regardless of `--force`.
+- `--force` - overwrite an existing `.gitlab-ci.cyan.yml`. Does not apply to `cyan-snippets/`: a pre-existing non-directory or non-empty `cyan-snippets` is always a hard error, regardless of `--force`.
 
 Success:
 
@@ -196,10 +196,10 @@ Exit code `1`. Same pattern (`Error: <message>`, exit `1`) applies to the two `c
 
 ### **`cyan build <source> [-o|--output <path>]`**
 
-Expands all annotations in `<source>` and writes plain GitLab CI YAML. All-or-nothing: if any annotation fails to resolve, no file is written — the build is aborted before anything touches disk.
+Expands all annotations in `<source>` and writes plain GitLab CI YAML. All-or-nothing: if any annotation fails to resolve, no file is written and the build is aborted before anything touches disk.
 
-- `<source>` — required, path to the `.cyan.yml` source file
-- `-o, --output <path>` — output file path. Defaults to `<source>` with `.cyan.yml` stripped and `.yml` appended in the same directory — e.g. `.gitlab-ci.cyan.yml` → `.gitlab-ci.yml`. If the source filename doesn't follow the `.cyan.yml` convention, Cyan falls back to stripping whatever extension is present and appending `.yml`.
+- `<source>` - required, path to the `.cyan.yml` source file
+- `-o, --output <path>` - output file path. Defaults to `<source>` with `.cyan.yml` stripped and `.yml` appended in the same directory - e.g. `.gitlab-ci.cyan.yml` → `.gitlab-ci.yml`. If the source filename doesn't follow the `.cyan.yml` convention, Cyan falls back to stripping whatever extension is present and appending `.yml`.
 
 Success:
 
@@ -214,7 +214,7 @@ Failure (e.g. unknown snippet, missing required parameter):
 
 ```bash
 $ cyan build .gitlab-ci.cyan.yml
-<formatted error block(s) — location, snippet, reason>
+<formatted error block(s) - location, snippet, reason>
 
 Build aborted: 1 annotation(s) failed. No file written.
 ```
@@ -225,10 +225,10 @@ Exit code `1`.
 
 ### **`cyan expand --explain <source>`**
 
-Dry run: for every annotation in `<source>`, prints its location, which snippet resolved (namespace/name, version, and whether it came from `local` or `bundled`), and the exact lines it would expand to — without writing any file.
+Dry run: for every annotation in `<source>`, prints its location, which snippet resolved (namespace/name, version, and whether it came from `local` or `bundled`), and the exact lines it would expand to, without writing any file.
 
-- `<source>` — required, path to the `.cyan.yml` source file
-- `--explain` — required in v1. Running `cyan expand <source>` without `--explain` does not perform a bare dry run; it prints an error telling you to add the flag:
+- `<source>` - required, path to the `.cyan.yml` source file
+- `--explain` - required in v1. Running `cyan expand <source>` without `--explain` does not perform a bare dry run; it prints an error telling you to add the flag:
 
 ```bash
 expand: only --explain is currently implemented. Run `cyan expand --explain <source>`.
@@ -241,10 +241,10 @@ Example, all annotations resolved:
 ```bash
 $ cyan expand --explain .gitlab-ci.cyan.yml
 Line 8, col 5 - build-image.script[0]
-  resolved: docker/build-push (v1, bundled)
- expands to:
-    - docker build -f Dockerfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+RESOLVED: docker/build-push (v1, bundled)
+expands to:
+  - docker build -f Dockerfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+  - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 
 2 annotation(s) checked, all resolved.
 ```
@@ -277,9 +277,9 @@ Exit code `0`.
 
 ### **`cyan lint <source>`**
 
-Validates that every annotation in `<source>` resolves to a known snippet with all required parameters present — without writing any output. Suitable for a pre-commit hook.
+Validates that every annotation in `<source>` resolves to a known snippet with all required parameters present, without writing any output. Suitable for a pre-commit hook.
 
-- `<source>` — required, path to the `.cyan.yml` source file
+- `<source>` - required, path to the `.cyan.yml` source file
 
 If everything is valid, the output is a single summary line:
 
@@ -290,16 +290,16 @@ $ cyan lint .gitlab-ci.cyan.yml
 
 Exit code `0`.
 
-If anything fails, each annotation is listed individually (passing ones marked `OK:`, failing ones marked `FAIL:` with the specific error), followed by a summary:
+If anything fails, each annotation is listed individually (passing ones marked `OK:`, failing ones marked `FAILED:` with the specific error), followed by a summary:
 
 ```bash
 $ cyan lint .gitlab-ci.cyan.yml
 Line 8, col 5 - build-image.script[0]
- OK: docker/build-push
+OK: docker/build-push
 
 Line 12, col 5 - deploy.script[0]
-  FAIL: kubectl/apply
-   - missing required parameter "namespace"
+FAILED: kubectl/apply
+ - missing required parameter "namespace"
 
 2 annotation(s) checked, 1 failed.
 ```
@@ -330,7 +330,6 @@ Configures the AWS CLI using static credentials from `$AWS_ACCESS_KEY_ID` / `$AW
 | ------------- | ------------ | ----------- |
 | `region`      | yes          | -           |
 | `profile`     | no           | `default`   |
-|               |              |             |
 
 ```yaml
 - '@aws-login(region: "us-east-1")'
@@ -345,7 +344,6 @@ Logs in to the Azure CLI using a service principal, via `$AZURE_CLIENT_ID` / `$A
 | **Parameter**  | **Required** | **Default** |
 | -------------- | ------------ | ----------- |
 | `subscription` | yes          | -           |
-|                |              |             |
 
 ```yaml
 - '@azure-login(subscription: "my-subscription-id")'
@@ -355,13 +353,12 @@ Logs in to the Azure CLI using a service principal, via `$AZURE_CLIENT_ID` / `$A
 
 ### `docker-build-push` (namespace `docker`, name `build-push`)
 
-Builds a Docker image tagged with the GitLab commit SHA and pushes it to the project's container registry, using GitLab's own `$CI_REGISTRY_IMAGE` and `$CI_COMMIT_SHA`. Does not perform `docker login` — assumes the pipeline has already authenticated to the registry separately.
+Builds a Docker image tagged with the GitLab commit SHA and pushes it to the project's container registry, using GitLab's own `$CI_REGISTRY_IMAGE` and `$CI_COMMIT_SHA`. Does not perform `docker login` - assumes the pipeline has already authenticated to the registry separately.
 
 | **Parameter** | **Required** | **Default**  |
 | ------------- | ------------ | ------------ |
 | `dockerfile`  | no           | `Dockerfile` |
 | `context`     | no           | `.`          |
-|               |              |              |
 
 ```yaml
 - '@docker-build-push(dockerfile: "Dockerfile", context: ".")'
@@ -371,14 +368,13 @@ Builds a Docker image tagged with the GitLab commit SHA and pushes it to the pro
 
 ### `kubectl-apply` (namespace `kubectl`, name `apply`)
 
-Selects a kubectl context and applies a manifest to a namespace. Assumes a working kubeconfig already exists in the environment (typically injected via a GitLab CI/CD file-type variable or a separate auth step) — does not set up kubeconfig itself.
+Selects a kubectl context and applies a manifest to a namespace. Assumes a working kubeconfig already exists in the environment (typically injected via a GitLab CI/CD file-type variable or a separate auth step). It does not set up kubeconfig itself.
 
 | **Parameter** | **Required** | **Default** |
 | ------------- | ------------ | ----------- |
 | `context`     | yes          | -           |
 | `manifest`    | yes          | -           |
 | `namespace`   | no           | `default`   |
-|               |              |             |
 
 ```yaml
 - '@kubectl-apply(context: "prod-cluster", manifest: "k8s/deploy.yaml", namespace: "production")'
@@ -390,27 +386,27 @@ Selects a kubectl context and applies a manifest to a namespace. Assumes a worki
 
 Cyan resolves every annotation against two possible sources: a local `cyan-snippets/` folder in your project, and the snippets bundled with the CLI itself.
 
-Resolution order: local first, then bundled. If `cyan-snippets/` contains a snippet with the same namespace and name as a bundled one, the local version is used instead — the bundled snippet is never silently mixed in or merged with it. There's no partial override; whichever version resolves is used in full.
+Resolution order: local first, then bundled. If `cyan-snippets/` contains a snippet with the same namespace and name as a bundled one, the local version is used instead - the bundled snippet is never silently mixed in or merged with it. There's no partial override; whichever version resolves is used in full.
 
-This is the only override mechanism. There's no remote registry, no network fetch, and no other way to customize or replace a snippet's behavior. This keeps Cyan fully offline and means the full set of snippets available to a build is always just two folders you can inspect directly — the CLI's own `snippets/bundled/`, and the project's `cyan-snippets/`.
+This is the only override mechanism. There's no remote registry, no network fetch, and no other way to customize or replace a snippet's behavior. This keeps Cyan fully offline and means the full set of snippets available to a build is always just two folders you can inspect directly; the CLI's own `snippets/bundled/`, and the project's `cyan-snippets/`.
 
 To override a bundled snippet, create a file in `cyan-snippets/` following the same snippet file format (`name`, `namespace`, `version`, `description`, `parameters`, `script`) with the matching `namespace`/`name`. For example, to override the bundled `aws-login` snippet with one that uses OIDC instead of static credentials, you'd place a snippet with `namespace: aws`, `name: login` in `cyan-snippets/`.
 
-`cyan expand --explain` reports which source each annotation resolved from — `local` or `bundled` — so it's always visible which version of a snippet is actually in effect for a given build.
+`cyan expand --explain` reports which source each annotation resolved from, `local` or `bundled`, so it's always visible which version of a snippet is actually in effect for a given build.
 
 <br>
 
 ## Why Trust This?
 
-Cyan touches credential and deployment logic — AWS keys, Azure service principals, container registry pushes, kubectl context switches. A tool that expands hidden CI logic in that space needs to earn trust, not ask for it. A few concrete design choices reflect that:
+Cyan touches credential and deployment logic; AWS keys, Azure service principals, container registry pushes, kubectl context switches. A tool that expands hidden CI logic in that space needs to earn trust, not ask for it. A few concrete design choices reflect that:
 
-- **Every expansion is inspectable before it happens.** `cyan expand --explain` shows exactly what each annotation will produce — the resolved snippet, its version, whether it came from `local` or `bundled`, and the literal expanded lines — without writing anything. Nothing is expanded silently; you can always see the real output before it lands in `.gitlab-ci.yml`.
+- **Every expansion is inspectable before it happens.** `cyan expand --explain` shows exactly what each annotation will produce; the resolved snippet, its version, whether it came from `local` or `bundled`, and the literal expanded lines, without writing anything. Nothing is expanded silently; you can always see the real output before it lands in `.gitlab-ci.yml`.
 - **No partial writes.** `cyan build` is all-or-nothing: if any annotation fails to resolve, no file is written at all. There's no scenario where a build partially succeeds and leaves a `.gitlab-ci.yml` that's half-expanded or silently missing a step.
 - **Your YAML stays your YAML.** Cyan uses a round-trip-preserving parser, so comments, formatting, and blank lines outside of expanded annotations are never mangled or reformatted. The diff between your source and the generated output should only ever show the annotation lines actually being expanded.
-- **Errors are explicit, not guessed.** Unknown parameters in an annotation call are rejected rather than ignored. A required parameter with no value and no default is a hard build error — Cyan has no conditional logic, so there's no such thing as a parameter that's "sometimes" needed; if it's required, it's required, and a missing value never silently produces broken output.
+- **Errors are explicit, not guessed.** Unknown parameters in an annotation call are rejected rather than ignored. A required parameter with no value and no default is a hard build error. Cyan has no conditional logic, so there's no such thing as a parameter that's "sometimes" needed; if it's required, it's required, and a missing value never silently produces broken output.
 - **Result types, not exceptions.** Internally, Cyan represents success and failure as explicit discriminated unions (`{ ok: true }` / `{ ok: false }`) rather than throwing. This isn't visible to you as a user, but it means failure paths are handled deliberately throughout the codebase rather than falling through to an uncaught exception.
 
-None of this makes Cyan clever. That's deliberate — for a tool sitting in front of deploy and login steps, boring and inspectable beats convenient and opaque.
+None of this makes Cyan clever. That's deliberate choice for a tool sitting in front of deploy and login steps - boring and inspectable beats convenient and opaque.
 
 <br>
 
