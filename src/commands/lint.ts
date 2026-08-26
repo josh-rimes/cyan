@@ -43,7 +43,7 @@ function formatLintPass(
   namespace: string,
   name: string,
 ): string {
-  return `${formatLocation(location)}\n OK: ${namespace}/${name}`;
+  return `${formatLocation(location)}\nOK: ${namespace}/${name}`;
 }
 
 export function runLintCheck(
