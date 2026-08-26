@@ -44,7 +44,7 @@ describe("cyan lint", () => {
 
     expect(text).toContain("unquoted-value");
 
-    expect(text).toContain("FAIL: docker/build-push");
+    expect(text).toContain("FAILED: docker/build-push");
     expect(text.toLowerCase()).toContain("no snippet found");
 
     expect(text).toContain('Unknown parameter "extra"');

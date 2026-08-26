@@ -118,7 +118,7 @@ function parseParams(
     if (body[i] !== '"') {
       return err(
         "unquoted-value",
-        `Expected a double-quoted string value for parameter "${key}" but found "${body[i] ?? "end of input"}`,
+        `Expected a double-quoted string value for parameter "${key}" but found "${body[i] ?? "end of input"}"`,
         location,
         raw,
       );

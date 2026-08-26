@@ -77,9 +77,9 @@ export function formatLocation(location: AnnotationLocation): string {
 
 export function formatSuccess(result: ExpansionSuccess): string {
   const header = formatLocation(result.location);
-  const identity = `  resolved: ${result.namespace}/${result.name} (v${result.version}, ${result.source})`;
-  const linesHeader = ` expands to:`;
-  const lines = result.resolvedLines.map((line) => `    ${line}`).join("\n");
+  const identity = `RESOLVED: ${result.namespace}/${result.name} (v${result.version}, ${result.source})`;
+  const linesHeader = `expands to:`;
+  const lines = result.resolvedLines.map((line) => `  - ${line}`).join("\n");
 
   return [header, identity, linesHeader, lines].join("\n");
 }
@@ -97,9 +97,9 @@ export function formatExpandError(error: ExpandError): string {
 
 export function formatFailure(failure: ExpansionFailure): string {
   const header = formatLocation(failure.location);
-  const identity = `  failed: ${failure.namespace}/${failure.name}`;
+  const identity = `FAILED: ${failure.namespace}/${failure.name}`;
   const errorLines = failure.error
-    .map((e) => `   - ${formatExpandError(e)}`)
+    .map((e) => `  * ${formatExpandError(e)}`)
     .join("\n");
 
   return [header, identity, errorLines].join("\n");
@@ -107,9 +107,9 @@ export function formatFailure(failure: ExpansionFailure): string {
 
 export function formatCallParseError(error: AnnotationParseError): string {
   const header = formatLocation(error.location);
-  const indentity = `FAIL: failed to parse annotation call (${error.kind})`;
-  const detail = `    - ${error.message}`;
-  const rawLine = `   raw: ${error.raw}`;
+  const indentity = `FAILED: failed to parse annotation call (${error.kind})`;
+  const detail = `  * ${error.message}`;
+  const rawLine = `  raw: ${error.raw}`;
 
   return [header, indentity, detail, rawLine].join("\n");
 }

@@ -30,9 +30,9 @@ export interface LintOutput {
 
 function formatLintFailure(failure: ExpansionFailure): string {
   const header = formatLocation(failure.location);
-  const identity = `  FAIL: ${failure.namespace}/${failure.name}`;
+  const identity = `FAILED: ${failure.namespace}/${failure.name}`;
   const errorLines = failure.error
-    .map((e) => `   - ${formatExpandError(e)}`)
+    .map((e) => `  * ${formatExpandError(e)}`)
     .join("\n");
 
   return [header, identity, errorLines].join("\n");
