@@ -1,0 +1,40 @@
+name: login-oidc
+namespace: aws
+version: "1.0.0"
+description: >
+  Configures AWS credentials via OIDC federation (short-lived, no stored secrets) by exchanging GitLab's ID token for temporary credentials via sts assume-role-with-web-identity, then verifies the login with sts get-caller-identity. Exports AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN as environment variables for subsequent script lines. REQUIRES a manually-configured job-level id_tokens: blocks - Cyan cannot write this for you, since it's a job-level YAML field, not a script sequence item. Add the following as a sibling of script: in your job (not inside it):
+    id_tokens:
+      AWS_ID_TOKEN:
+        aud: https://gitlab.com # match whatever audience your AWS IAM OIDC provider trust policy expects
+  The id_tokens: key name above (AWS_ID_TOKEN) must match this snippet's token_var parameter (default: AWS_ID_TOKEN) - override token_var if you name your token key something else. IF id_tokens: is missing or the name doesn't match, this snippet's script fails at runtime with an undefined-variable or AccessDenied error - Cyan cannot detect this at build time.
+parameters:
+  role_arn:
+    type: string
+    required: true
+  region:
+    type: string
+    required: true
+  role_session_name:
+    type: string
+    required: false
+    default: "GitLabRunner-${CI_PROJECT_ID}-${CI_PIPELINE_ID}"
+  duration_seconds:
+    type: string
+    required: false
+    default: "3600"
+  token_var:
+    type: string
+    required: false
+    default: "AWS_ID_TOKEN"
+script:
+  - >
+    aws_sts_output=$(aws sts assume-role-with-web-identity
+    --role-arn "{{role_arn}}"
+    --role-session-name "{{role_session_name}}"
+    --web-indentity-token ${{token_var}}
+    --region {{region}}
+    --duration-seconds {{duration_seconds}}
+    --query 'Credentials.[AccessKeyId, SecretAccessKey, SessionToken]'
+    --output text)
+  - export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" $aws_sts_output)
+  - aws sts get-caller-identity
