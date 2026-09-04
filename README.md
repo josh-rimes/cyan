@@ -1,6 +1,6 @@
-# Cyan v1.0.1
+# Cyan v1.1.0
 
-Cyan is a CLI preprocessor for GitLab CI YAML. It lets you write `@annotations` inside `script:` blocks of .gitlab-ci.cyan.yml files, which Cyan expands into pre-built or custom, parameterized snippets. This produces an ordinary .gitlab-ci.yml that GitLab CI understands natively. Cyan v1.0.1 currently has no runtime component - it only runs at build time, before your pipeline executes.
+Cyan is a CLI preprocessor for GitLab CI YAML. It lets you write `@annotations` inside `script:` blocks of .gitlab-ci.cyan.yml files, which Cyan expands into pre-built or custom, parameterized snippets. This produces an ordinary .gitlab-ci.yml that GitLab CI understands natively. Cyan v1.1.0 currently has no runtime component - it only runs at build time, before your pipeline executes.
 
 Cyan is GitLab CI–only and CLI-only. It does not support GitHub Actions, Azure Pipelines, or other CI platforms, and there's no editor plugin or live/runtime expansion yet; annotations are only ever expanded by explicitly running `cyan build` or `cyan expand`. Snippets support simple `{{param}}` string parameters with defaults; there's no conditional or loop logic inside snippets, by design. This keeps expanded output fully predictable and easy to audit.
 <br><br>
