@@ -318,13 +318,13 @@ Exit code `0`.
 
 ## Bundled Snippets
 
-Cyan ships with four bundled snippets, versioned with the CLI itself. A local snippet in `cyan-snippets/` with the same namespace/name overrides the bundled one (see Local Snippet Overrides).
+Cyan ships with five bundled snippets, versioned with the CLI itself. A local snippet in `cyan-snippets/` with the same namespace/name overrides the bundled one (see Local Snippet Overrides).
 
 ### `aws-login` (namespace `aws`, name `login`)
 
 Configures the AWS CLI using static credentials from `$AWS_ACCESS_KEY_ID` / `$AWS_SECRET_ACCESS_KEY`, and verifies the login with `sts get-caller-identity`.
 
-> ⚠️ No OIDC support yet. This snippet uses static, long-lived AWS credentials rather than OIDC role assumption. OIDC would require job-level id_tokens configuration beyond the scope of a script-level annotation, and is planned for a post-v1 release. If your security posture requires OIDC, don't use this snippet as-is yet.
+> ⚠️ This snippet uses static, long-lived AWS credentials. For OIDC role assumption (short-lived credentials, no long-lived secrets stored), use `aws-login-oidc` instead.
 
 | **Parameter** | **Required** | **Default** |
 | ------------- | ------------ | ----------- |
@@ -333,6 +333,34 @@ Configures the AWS CLI using static credentials from `$AWS_ACCESS_KEY_ID` / `$AW
 
 ```yaml
 - '@aws-login(region: "us-east-1")'
+```
+
+<br>
+
+### `aws-login-oidc` (namespace `aws`, name `login-oidc`)
+
+Configures AWS credentials via OIDC federation by exchanging GitLab's ID token for temporary credentials via `sts assume-role-with-web-identity`, then verifies the login with `sts get-caller-identity`. Exports `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_SESSION_TOKEN` as environment variables for subsequent script lines - no long-lived AWS credentials are stored anywhere.
+
+> ⚠️ Requires a manually-configured job-level `id_tokens:` block. Cyan cannot write this for you - it's a job-level YAML field, not a script sequence item. Add this as a sibling of `script:` in your job:
+>
+> ```yaml
+> id_tokens:
+>   AWS_ID_TOKEN:
+>     aud: https://gitlab.com # match whatever audience your AWS IAM OIDC provider trust policy expects
+> ```
+>
+> The `id_tokens:` key name above must match this snippet's `token_var` parameter (default `AWS_ID_TOKEN`) - override `token_var` if you name your token key something else. If `id_tokens:` is missing or the name doesn't match, the snippet fails at runtime with an undefined-variable or `AccessDenied` error; Cyan cannot detect this at build time.
+
+| **Parameter**       | **Required** | **Default**                                       |
+| ------------------- | ------------ | ------------------------------------------------- |
+| `role_arn`          | yes          | -                                                 |
+| `region`            | yes          | -                                                 |
+| `role_session_name` | no           | `GitLabRunner-${CI_PROJECT_ID}-${CI_PIPELINE_ID}` |
+| `duration_seconds`  | no           | `3600`                                            |
+| `token_var`         | no           | `AWS_ID_TOKEN`                                    |
+
+```yaml
+- '@aws-login-oidc(role_arn: "arn:aws:iam::123456789012:role/gitlab-ci", region: "us-east-1")'
 ```
 
 <br>
@@ -390,7 +418,7 @@ Resolution order: local first, then bundled. If `cyan-snippets/` contains a snip
 
 This is the only override mechanism. There's no remote registry, no network fetch, and no other way to customize or replace a snippet's behavior. This keeps Cyan fully offline and means the full set of snippets available to a build is always just two folders you can inspect directly; the CLI's own `snippets/bundled/`, and the project's `cyan-snippets/`.
 
-To override a bundled snippet, create a file in `cyan-snippets/` following the same snippet file format (`name`, `namespace`, `version`, `description`, `parameters`, `script`) with the matching `namespace`/`name`. For example, to override the bundled `aws-login` snippet with one that uses OIDC instead of static credentials, you'd place a snippet with `namespace: aws`, `name: login` in `cyan-snippets/`.
+To override a bundled snippet, create a file in `cyan-snippets/` following the same snippet file format (`name`, `namespace`, `version`, `description`, `parameters`, `script`) with the matching `namespace`/`name`. For example, to override the bundled `docker-build-push` snippet with a version that adds registry cache flags, you'd place a snippet with `namespace: docker`, `name: build-push` in `cyan-snippets/`.
 
 `cyan expand --explain` reports which source each annotation resolved from, `local` or `bundled`, so it's always visible which version of a snippet is actually in effect for a given build.
 
