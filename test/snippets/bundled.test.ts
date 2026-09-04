@@ -25,6 +25,15 @@ describe("bundled snippets", () => {
     expect(result.value.name).toBe("login");
   });
 
+  it("aws-login-oidc loads and validates", () => {
+    const result = loadValidated("aws", "login-oidc");
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.namespace).toBe("aws");
+    expect(result.value.name).toBe("login-oidc");
+  });
+
   it("azure-login loads and validates", () => {
     const result = loadValidated("azure", "login");
 
